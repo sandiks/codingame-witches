@@ -3,18 +3,34 @@ STDOUT.sync = true # DO NOT REMOVE
 # the standard input according to the problem statement.
 require_relative 'helper'
 
+class Array
+
+  def mul(factors)
+    sum =0
+    for i in 0..self.length-1
+      sum += self[i] * factors[i]
+    end
+    sum
+  end
+
+end
+
+
 class Player
   attr_accessor :inv, :score
+  attr_accessor :brew_recipes, :spells
 end
+
 class Recipe
   attr_accessor :aid, :atype, :ingreds, :price, :tome_index, :tax_count, :castable, :repeatable 
-  attr_accessor :total_ingreds
+  attr_accessor :total_worth
 end
 
 class Game
     attr_accessor :players, :recipes, :testing
     
     def initialize()
+      @factors = [10.0, 20.0, 30.0, 40.0]
     end
     
     def  parse_input_data
@@ -28,14 +44,13 @@ class Game
           r = Recipe.new
           r.aid = action_id.to_i
           r.atype = action_type
-          r.ingreds = [d0, d1, d2, d3].map{|x| -x.to_i}
+          r.ingreds = [d0, d1, d2, d3].map{|x| x.to_i}
 
           r.price = price.to_i
           r.tome_index = tome_index.to_i
           r.tax_count = tax_count.to_i
           r.castable = castable.to_i == 1
           r.repeatable = repeatable.to_i == 1
-          r.total_ingreds = r.ingreds.sum 
           @recipes << r
         end
     
@@ -52,7 +67,11 @@ class Game
   
     def parse_input_data_and_init_some_variables
       @my = @players[0]
+      @brew_recipes = @recipes.select{|s| s.atype =="BREW"}
+
+      @my.spells = @recipes.select{|s| s.atype =="CAST"}
       @opp = @players[1]
+      @opp.spells = @recipes.select{|s| s.atype =="OPPONENT_CAST"}
     end
 
   def run
@@ -64,6 +83,7 @@ class Game
       @testing ? parse_data_f : parse_input_data
 
       parse_input_data_and_init_some_variables
+
       printf("----players info #{round}
         my inventory #{@my.inv}
         opp inventory #{@opp.inv}\n") if @testing
@@ -80,14 +100,24 @@ class Game
     end
   end
 
-  def one_ge_other(a,b)
-    a[0]>=b[0] && a[1]>=b[1] && a[2]>=b[2] && a[3]>=b[3]
+  def can_use_recipe(a,b)
+    a[0] >= -b[0] && a[1] >= -b[1] && a[2] >= -b[2] && a[3] >= -b[3]
   end
+  
 
+  
   def find_match_recipes
-    sorted = @recipes.sort_by(&:price).reverse
     inv = @my.inv
-    matched = sorted.select { |rr| one_ge_other(inv,rr.ingreds) }
+    p player_factor = @my.inv.mul(@factors)
+
+    @brew_recipes.each do |rr|
+      rr.total_worth = -rr.ingreds.mul(@factors)/player_factor * rr.price
+    end
+
+    sorted = @brew_recipes.sort_by{|x| x.total_worth}
+    p sorted.map{|rr| [rr.aid,rr.ingreds, rr.total_worth]}
+    
+    matched = sorted.select { |rr| can_use_recipe(inv,rr.ingreds) }
   end
 
   def select_best_recipe(matched)
@@ -97,5 +127,5 @@ class Game
 end
 
 g = Game.new
-g.testing = false
+g.testing = true
 g.run

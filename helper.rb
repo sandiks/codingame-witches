@@ -12,14 +12,14 @@ def  parse_data_f
       r = Recipe.new
       r.aid = action_id.to_i
       r.atype = action_type
-      r.ingreds = [d0, d1, d2, d3].map{|x| -x.to_i}
+      r.ingreds = [d0, d1, d2, d3].map{|x| x.to_i}
 
       r.price = price.to_i
       r.tome_index = tome_index.to_i
       r.tax_count = tax_count.to_i
       r.castable = castable.to_i == 1
       r.repeatable = repeatable.to_i == 1
-      r.total_ingreds = r.ingreds.sum
+      r.total_worth = r.ingreds.mul([10.0, 20.0, 30.0, 40.0])
       @recipes << r
     end
 
