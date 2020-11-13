@@ -1,0 +1,58 @@
+        # action_id: the unique ID of this spell or recipe
+        # action_type: in the first league: BREW; later: CAST, OPPONENT_CAST, LEARN, BREW
+        # delta_0: tier-0 ingredient change
+        # delta_1: tier-1 ingredient change
+        # delta_2: tier-2 ingredient change
+        # delta_3: tier-3 ingredient change
+        # price: the price in rupees if this is a potion
+        # tome_index: in the first two leagues: always 0; later: the index in the tome if this is a tome spell, equal to the read-ahead tax
+        # tax_count: in the first two leagues: always 0; later: the amount of taxed tier-0 ingredients you gain from learning this spell
+        # castable: in the first league: always 0; later: 1 if this is a castable player spell
+        # repeatable: for the first two leagues: always 0; later: 1 if this is a repeatable player spell
+
+
+------------------------
+ -----Rules
+
+Each player controls a witch, each witch has access to their own inventory of potion ingredients.
+
+Each client order is a list of ingredients required to brew a potion and earn some rupees.
+
+The game is played over several rounds. Each player performs one action each turn, simultaneously.
+
+-----Ingredients
+
+There are 4 tiers of ingredient, indexed from 0 to 3 .
+Higher tier ingredients are typically necessary in more expensive potion recipes but take longer to acquire.
+
+Each witch starts with a full inventory of 10 ingredients.
+
+The inventory is represented by inv: 4 numbers each representing the amount of each ingredient tier.
+If inv0 is 3 then you have 3 tier-0 ingredients.
+Action overview
+
+For this league, you must Brew two potions from the list of client orders. The witch having earned the most rupees wins.
+Brewing
+
+Client orders have a delta: 4 numbers, one for each ingredient tier.
+Negative numbers represent the amount of ingredients that are consumed by the recipe.
+Therefore, the numbers are never positive because they represent a loss of ingredients from your inventory.
+
+For instance, a client order with delta = -2, -1, 0, 0 means you have to consume 2 tier-0 ingredients and 1 tier-1 ingredients from your inventory in order to brew the potion.
+
+The selling price of the client order is the amount of rupees will you earn by completing it.
+This potion requires five ingredients and is worth 10 rupees. delta0 is -2, so you need at least 2 tier-0 ingredients in the inventory. Check this with the inv0 variable.
+
+The client orders are queued up from left to right. Only five clients can fit inside the hut so a maximum of 5 orders will be available every turn.
+If both witches brew the same potion, they both earn its price in rupees.
+
+At the start of each new turn, new orders are queued up to fill the missing spaces.
+
+Each order has a unique id and can be undertaken with the BREW id command.
+
+You may also opt to skip a turn with the WAIT command.
+⛔ Game end
+
+The game ends once at least one witch has brewed 2 potions.
+
+The game stops automatically after 100 rounds.
